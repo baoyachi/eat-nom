@@ -12,3 +12,4 @@ edition = "2018"
 
 [dependencies]
 nom = "5"
+ipnetwork = "0.16.0"
