@@ -1,5 +1,5 @@
 extern crate nom;
 
-mod ip;
-mod error;
+pub mod ip;
+pub mod error;
 
