@@ -6,6 +6,7 @@ use nom::combinator::map;
 use nom::character::complete::alphanumeric1;
 use std::io::Error as IoError;
 use std::error::Error as StdError;
+use std::net::AddrParseError as AddrParseError;
 use std::fmt::Display;
 use nom::error::ParseError;
 
@@ -45,6 +46,7 @@ pub enum ErrorKind {
     IoError(IoError),
     NomParserError(String),
     StringError(String),
+    AddrParseError(AddrParseError),
     EmptyError,
 }
 
@@ -52,6 +54,7 @@ impl<I: std::fmt::Debug> StdError for Error<I> {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
         match &self.kind {
             ErrorKind::IoError(ref e) => Some(e),
+            ErrorKind::AddrParseError(ref e) => Some(e),
             ErrorKind::NomParserError(_) => None,
             ErrorKind::StringError(_) => None,
             ErrorKind::EmptyError => None,
@@ -63,6 +66,7 @@ impl<I> Display for Error<I> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.kind {
             ErrorKind::IoError(ref e) => e.fmt(f),
+            ErrorKind::AddrParseError(ref e) => e.fmt(f),
             ErrorKind::NomParserError(ref e) => e.fmt(f),
             ErrorKind::StringError(ref e) => e.fmt(f),
             ErrorKind::EmptyError => write!(f, "Empty Error"),
@@ -82,6 +86,13 @@ impl<I> From<IoError> for Error<I> {
         Error::new(ErrorKind::IoError(s))
     }
 }
+
+impl<I> From<AddrParseError> for Error<I> {
+    fn from(s: AddrParseError) -> Self {
+        Error::new(ErrorKind::AddrParseError(s))
+    }
+}
+
 
 impl<'a> From<Error<&'a str>> for Error<()> {
     fn from(s: Error<&'a str>) -> Self {

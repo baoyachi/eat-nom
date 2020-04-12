@@ -4,23 +4,8 @@ use nom::error::ErrorKind;
 use crate::error::*;
 use nom::InputTakeAtPosition;
 
-
-pub fn ip0(input: &str) -> IResult<&str, &str> {
-    let (x,out) = input.split_at_position_complete(
-        |item| {
-            match item as u8 {
-                b'0'..=b'9' => false,
-                b'A'..=b'F' | b'a'..=b'f' => false,
-                b':' | b'.' | b'-' => false,
-                _ => true,
-            }
-        }
-    )?;
-    Ok(("",""))
-}
-
-pub fn ip1(input: &str) -> IResult<&str, IpAddr> {
-    let (x,out) = input.split_at_position1_complete(
+pub fn ip(input: &str) -> IResult<&str, IpAddr> {
+    let (input, out) = input.split_at_position1_complete(
         |item| {
             match item as u8 {
                 b'0'..=b'9' => false,
@@ -29,10 +14,10 @@ pub fn ip1(input: &str) -> IResult<&str, IpAddr> {
                 _ => true,
             }
         },
-        ErrorKind::Char
+        ErrorKind::Char,
     )?;
-    let ip = out.parse().unwrap();
-    Ok((x,ip))
+    let ip = out.parse::<IpAddr>()?;
+    Ok((input, ip))
 }
 
 #[cfg(test)]
@@ -40,11 +25,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_ip() {
-        let input = "@127.0.0.1!";
-        println!("{:?}", ip0(input));
-
-        let input = "127.0.0.1!";
-        println!("{:?}", ip1(input));
+    fn test_ip() -> Result<()>{
+        let input = "127.0.0.1";
+        let (input,ip) = ip(input)?;
+        assert_eq!(input,"");
+        assert_eq!(ip,"127.0.0.1".parse::<IpAddr>()?);
+        Ok(())
     }
 }
