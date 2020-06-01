@@ -11,5 +11,5 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-nom = "5"
+nom = "6.0.0-alpha1"
 ipnetwork = "0.16.0"
