@@ -26,6 +26,14 @@ impl std::error::Error for ErrorKind {
     }
 }
 
+impl From<std::net::AddrParseError> for ErrorKind {
+    #[cfg_attr(tarpaulin, skip)]
+    fn from(s: std::net::AddrParseError) -> Self {
+        ErrorKind::StringError(s.to_string())
+    }
+}
+
+
 impl nom::error::ParseError<&str> for ErrorKind {
     #[cfg_attr(tarpaulin, skip)]
     fn from_error_kind(input: &str, kind: nom::error::ErrorKind) -> Self {
@@ -76,7 +84,7 @@ mod tests {
         }
 
         match until_eof("hello, worldeof") {
-            Err(e) => assert!(true),
+            Err(_) => assert!(true),
             _ => assert!(false),
         }
         Ok(())

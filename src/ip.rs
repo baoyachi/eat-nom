@@ -1,8 +1,12 @@
-use nom::branch::alt;
-use nom::bytes::complete::tag;
-use nom::error::ErrorKind;
-use nom::sequence::tuple;
-use nom::InputTakeAtPosition;
+use nom::{
+    branch::alt,
+    bytes::complete::tag,
+    error::ErrorKind,
+    sequence::tuple,
+    InputTakeAtPosition,
+};
+use crate::error::EResult;
+use std::net::IpAddr;
 
 pub fn ip(input: &str) -> nom::IResult<&str, &str> {
     input.split_at_position1_complete(
@@ -26,11 +30,27 @@ pub fn ip_mask(input: &str) -> nom::IResult<&str, (&str, &str)> {
     Ok((input, (ip, mask)))
 }
 
+pub fn parse_ip(input: &str) -> EResult<(&str, IpAddr)> {
+    let (input, out) = ip(input)?;
+    let ip = out.parse::<IpAddr>()?;
+    Ok((input, ip))
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::error::*;
     use crate::error1::Result;
+    use std::net::Ipv4Addr;
+
+    #[test]
+    fn test_parse_ip() -> EResult<()> {
+        let ipv4 = "127.0.0.1";
+        let (input, ip) = parse_ip(ipv4)?;
+        assert_eq!(input, "");
+        assert_eq!(ip, Ipv4Addr::new(127, 0, 0, 1));
+        Ok(())
+    }
 
     #[test]
     fn test_ip_mask() -> Result<()> {
