@@ -1,18 +1,16 @@
-use nom::error::ErrorKind;
-use nom::InputTakeAtPosition;
-use nom::sequence::tuple;
-use nom::bytes::complete::tag;
 use nom::branch::alt;
+use nom::bytes::complete::tag;
+use nom::error::ErrorKind;
+use nom::sequence::tuple;
+use nom::InputTakeAtPosition;
 
 pub fn ip(input: &str) -> nom::IResult<&str, &str> {
     input.split_at_position1_complete(
-        |item| {
-            match item as u8 {
-                b'0'..=b'9' => false,
-                b'A'..=b'F' | b'a'..=b'f' => false,
-                b':' | b'.' => false,
-                _ => true,
-            }
+        |item| match item as u8 {
+            b'0'..=b'9' => false,
+            b'A'..=b'F' | b'a'..=b'f' => false,
+            b':' | b'.' => false,
+            _ => true,
         },
         ErrorKind::Char,
     )
@@ -23,16 +21,16 @@ pub fn mask(input: &str) -> nom::IResult<&str, &str> {
 }
 
 pub fn ip_mask(input: &str) -> nom::IResult<&str, (&str, &str)> {
-    let split = alt((tag("/"), tag("-"), tag(" "),tag("~")));
+    let split = alt((tag("/"), tag("-"), tag(" "), tag("~")));
     let (input, (ip, _, mask)) = tuple((ip, split, mask))(input)?;
     Ok((input, (ip, mask)))
 }
-
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::error::*;
+    use crate::error1::Result;
 
     #[test]
     fn test_ip_mask() -> Result<()> {

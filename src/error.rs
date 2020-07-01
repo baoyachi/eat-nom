@@ -1,142 +1,84 @@
-use std::io::Error as IoError;
-use std::error::Error as StdError;
-use std::net::AddrParseError as AddrParseError;
-use std::fmt::Display;
-use nom::error::ParseError;
-
-pub type Result<I> = std::result::Result<I, Error<I>>;
-pub type IResult<I, O> = std::result::Result<(I, O), Error<I>>;
-
-
-#[derive(Debug)]
-pub struct Error<I> {
-    kind: ErrorKind,
-    error: nom::error::VerboseError<I>,
-    incomplete: String,
-
-}
-
-impl<I> Error<I> {
-    pub fn new(kind: ErrorKind) -> Error<I> {
-        Error {
-            kind,
-            error: nom::error::VerboseError { errors: vec![] },
-            incomplete: "".to_string(),
-        }
-    }
-
-    pub fn new_nom_error(input: I, kind: nom::error::ErrorKind) -> Self {
-        Self {
-            kind: ErrorKind::NomParserError("Nom parser error".to_string()),
-            error: nom::error::VerboseError::from_error_kind(input, kind),
-            incomplete: "".to_string(),
-        }
-    }
-}
-
+pub type EResult<I> = std::result::Result<I, ErrorKind>;
 
 #[derive(Debug)]
 pub enum ErrorKind {
-    IoError(IoError),
-    NomParserError(String),
     StringError(String),
-    AddrParseError(AddrParseError),
-    EmptyError,
+    NomError(String),
 }
 
-impl<I: std::fmt::Debug> StdError for Error<I> {
-    fn source(&self) -> Option<&(dyn StdError + 'static)> {
-        match &self.kind {
-            ErrorKind::IoError(ref e) => Some(e),
-            ErrorKind::AddrParseError(ref e) => Some(e),
-            ErrorKind::NomParserError(_) => None,
-            ErrorKind::StringError(_) => None,
-            ErrorKind::EmptyError => None,
-        }
-    }
-}
-
-impl<I> Display for Error<I> {
+impl std::fmt::Display for ErrorKind {
+    #[cfg_attr(tarpaulin, skip)]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match &self.kind {
-            ErrorKind::IoError(ref e) => e.fmt(f),
-            ErrorKind::AddrParseError(ref e) => e.fmt(f),
-            ErrorKind::NomParserError(ref e) => e.fmt(f),
+        match &self {
             ErrorKind::StringError(ref e) => e.fmt(f),
-            ErrorKind::EmptyError => write!(f, "Empty Error"),
+            ErrorKind::NomError(ref e) => e.fmt(f),
         }
     }
 }
 
-impl<I> From<std::string::String> for Error<I> {
-    fn from(s: std::string::String) -> Self {
-        Error::new(ErrorKind::StringError(s))
+impl std::error::Error for ErrorKind {
+    #[cfg_attr(tarpaulin, skip)]
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match &self {
+            ErrorKind::StringError(ref _e) => None,
+            ErrorKind::NomError(ref _e) => None,
+        }
     }
 }
 
+impl nom::error::ParseError<&str> for ErrorKind {
+    #[cfg_attr(tarpaulin, skip)]
+    fn from_error_kind(input: &str, kind: nom::error::ErrorKind) -> Self {
+        ErrorKind::NomError(format!("input:[{}],kind:[{:?}]", input, kind))
+    }
 
-impl<I> From<IoError> for Error<I> {
-    fn from(s: IoError) -> Self {
-        Error::new(ErrorKind::IoError(s))
+    #[cfg_attr(tarpaulin, skip)]
+    fn append(_input: &str, _kind: nom::error::ErrorKind, other: Self) -> Self {
+        other
     }
 }
 
-impl<I> From<AddrParseError> for Error<I> {
-    fn from(s: AddrParseError) -> Self {
-        Error::new(ErrorKind::AddrParseError(s))
-    }
-}
-
-
-impl<'a> From<Error<&'a str>> for Error<()> {
-    fn from(s: Error<&'a str>) -> Self {
-        Error::new(ErrorKind::StringError(format!(
-            "kind:{:?},error:{:?}",
-            s.kind, s.error
-        )))
-    }
-}
-
-
-impl<I: std::fmt::Debug> From<nom::Err<(I, nom::error::ErrorKind)>> for Error<I> {
-    fn from(i: nom::Err<(I, nom::error::ErrorKind)>) -> Self {
+impl From<nom::Err<(&str, nom::error::ErrorKind)>> for ErrorKind {
+    #[cfg_attr(tarpaulin, skip)]
+    fn from(i: nom::Err<(&str, nom::error::ErrorKind)>) -> Self {
         match i {
-            nom::Err::Error(err) | nom::Err::Failure(err) => Error::new_nom_error(err.0, err.1),
-            nom::Err::Incomplete(i) => Error::new(ErrorKind::StringError(format!(
-                "Nom parser Incomplete error: {:?}",
-                i
-            ))),
+            nom::Err::Error(err) | nom::Err::Failure(err) => {
+                ErrorKind::NomError(format!("input:[{}],kind:[{:?}]", err.0, err.1))
+            }
+            nom::Err::Incomplete(i) => {
+                ErrorKind::StringError(format!("nom parser Incomplete error: {:?}", i))
+            }
         }
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use nom::bytes::complete::take_until;
 
-impl<I> Into<nom::error::VerboseError<I>> for Error<I> {
-    fn into(self) -> nom::error::VerboseError<I> {
-        self.error
-    }
-}
-
-impl<I: std::fmt::Debug> nom::error::ParseError<I> for Error<I> {
-    fn from_error_kind(input: I, kind: nom::error::ErrorKind) -> Self {
-        Error::new_nom_error(input, kind)
-    }
-
-    fn append(input: I, kind: nom::error::ErrorKind, mut other: Self) -> Self {
-        other
-            .error
-            .errors
-            .push((input, nom::error::VerboseErrorKind::Nom(kind)));
-        other
-    }
-
-    fn from_char(input: I, c: char) -> Self {
-        Self {
-            kind: ErrorKind::EmptyError,
-            error: nom::error::VerboseError::from_char(input, c),
-            incomplete: "".to_string(),
+    #[test]
+    fn test_until_eof_ok() -> EResult<()> {
+        fn until_eof(s: &str) -> nom::IResult<&str, &str> {
+            take_until("eof")(s)
         }
+
+        let (x, y) = until_eof("hello, worldeof")?;
+        assert_eq!(x, "eof");
+        assert_eq!(y, "hello, world");
+        Ok(())
     }
 
+    #[test]
+    fn test_until_eof_error() -> EResult<()> {
+        fn until_eof(s: &str) -> nom::IResult<&str, &str> {
+            take_until("e1of")(s)
+        }
 
+        match until_eof("hello, worldeof") {
+            Err(e) => assert!(true),
+            _ => assert!(false),
+        }
+        Ok(())
+    }
 }
