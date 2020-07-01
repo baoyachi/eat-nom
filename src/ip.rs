@@ -36,12 +36,29 @@ pub fn parse_ip(input: &str) -> EResult<(&str, IpAddr)> {
     Ok((input, ip))
 }
 
+pub fn parse_ip_mask<'a>(input: &'a str, split: &'a str) -> EResult<(&'a str, (IpAddr, IpAddr))> {
+    let (input, (ip, _, mask)) = tuple((ip, tag(split), mask))(input)?;
+    let ip = ip.parse::<IpAddr>()?;
+    let mask = mask.parse::<IpAddr>()?;
+    Ok((input, (ip, mask)))
+}
+
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::error1::Result;
     use std::net::Ipv4Addr;
+
+    #[test]
+    fn test_parse_ip_mask() -> EResult<()> {
+        let ip_mask = "127.0.0.1/255.0.255.0";
+        let (input, (ip,mask)) = parse_ip_mask(ip_mask,"/")?;
+        assert_eq!(input, "");
+        assert_eq!(ip, Ipv4Addr::new(127, 0, 0, 1));
+        assert_eq!(mask, Ipv4Addr::new(255,0,255,0));
+        Ok(())
+    }
 
     #[test]
     fn test_parse_ip() -> EResult<()> {
