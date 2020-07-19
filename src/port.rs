@@ -8,7 +8,7 @@ use crate::util::new_range;
 
 
 pub fn parse_port(input: &str) -> EatResult<usize> {
-    let (_, digit) = digit1(input);
+    let (_, digit) = digit1(input)?;
     let digit = digit.parse::<usize>()?;
     Ok(digit)
 }
@@ -28,5 +28,5 @@ pub fn parse_port_range<'a>(input: &'a str, concat: &'a str) -> EatResult<Range<
                                       digit1))(input)?;
     let start = start.parse::<usize>()?;
     let end = end.parse::<usize>()?;
-    Ok((new_range(start, end)))
+    Ok(new_range(start, end))
 }
