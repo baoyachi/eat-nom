@@ -26,15 +26,17 @@ pub fn parse_ip(input: &str) -> EatResult<IpAddr> {
     Ok(ip)
 }
 
+/// # Example
 /// ```rust
-/// # fn main() {
+///
+///
 /// use eat_nom::ip::parse_ip_mask;
 /// use std::net::{Ipv4Addr, IpAddr};
 ///
 /// assert_eq!(parse_ip_mask("127.0.0.1/255.0.255.0","/").unwrap(),
 ///           (("127.0.0.1".parse::<IpAddr>().unwrap(),"255.0.255.0".parse::<IpAddr>().unwrap(),))
 /// );
-/// # }
+///
 /// ```
 pub fn parse_ip_mask<'a>(input: &'a str, concat: &'a str) -> EatResult<(IpAddr, IpAddr)> {
     let (_, (ip, _, mask)) = tuple((ip, tag(concat), mask))(input)?;
