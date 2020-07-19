@@ -19,24 +19,35 @@ pub fn mask(input: &str) -> nom::IResult<&str, &str> {
     ip(input)
 }
 
-pub fn parse_ip(input: &str) -> EatResult<(&str, IpAddr)> {
-    let (input, out) = ip(input)?;
+pub fn parse_ip(input: &str) -> EatResult<IpAddr> {
+    let (_, out) = ip(input)?;
     let ip = out.parse::<IpAddr>()?;
-    Ok((input, ip))
+    Ok(ip)
 }
 
-pub fn parse_ip_mask<'a>(input: &'a str, concat: &'a str) -> EatResult<(&'a str, (IpAddr, IpAddr))> {
-    let (input, (ip, _, mask)) = tuple((ip, tag(concat), mask))(input)?;
+
+/// ```rust
+/// # fn main() {
+/// use eat_nom::ip::parse_ip_mask;
+/// use std::net::{Ipv4Addr, IpAddr};
+///
+/// assert_eq!(parse_ip_mask("127.0.0.1/255.0.255.0","/").unwrap(),
+///           (("127.0.0.1".parse::<IpAddr>().unwrap(),"255.0.255.0".parse::<IpAddr>().unwrap(),))
+/// );
+/// # }
+/// ```
+pub fn parse_ip_mask<'a>(input: &'a str, concat: &'a str) -> EatResult<(IpAddr, IpAddr)> {
+    let (_, (ip, _, mask)) = tuple((ip, tag(concat), mask))(input)?;
     let ip = ip.parse::<IpAddr>()?;
     let mask = mask.parse::<IpAddr>()?;
-    Ok((input, (ip, mask)))
+    Ok((ip, mask))
 }
 
-pub fn parse_ip_cidr<'a>(input: &'a str, concat: &'a str) -> EatResult<(&'a str, (IpAddr, usize))> {
-    let (input, (ip, _, cidr)) = tuple((ip, tag(concat), digit1))(input)?;
+pub fn parse_ip_cidr<'a>(input: &'a str, concat: &'a str) -> EatResult<(IpAddr, usize)> {
+    let (_, (ip, _, cidr)) = tuple((ip, tag(concat), digit1))(input)?;
     let ip = ip.parse::<IpAddr>()?;
     let cidr = cidr.parse::<usize>()?;
-    Ok((input, (ip, cidr)))
+    Ok((ip, cidr))
 }
 
 
@@ -48,8 +59,7 @@ mod tests {
     #[test]
     fn test_parse_ip_mask() -> EatResult<()> {
         let ip_mask = "127.0.0.1/255.0.255.0";
-        let (input, (ip, mask)) = parse_ip_mask(ip_mask, "/")?;
-        assert_eq!(input, "");
+        let (ip, mask) = parse_ip_mask(ip_mask, "/")?;
         assert_eq!(ip, Ipv4Addr::new(127, 0, 0, 1));
         assert_eq!(mask, Ipv4Addr::new(255, 0, 255, 0));
         Ok(())
@@ -58,8 +68,7 @@ mod tests {
     #[test]
     fn test_parse_ip() -> EatResult<()> {
         let ipv4 = "127.0.0.1";
-        let (input, ip) = parse_ip(ipv4)?;
-        assert_eq!(input, "");
+        let ip = parse_ip(ipv4)?;
         assert_eq!(ip, Ipv4Addr::new(127, 0, 0, 1));
         Ok(())
     }
@@ -67,8 +76,7 @@ mod tests {
     #[test]
     fn test_parse_ip_cidr() -> EatResult<()> {
         let ip_cidr = "127.0.0.1/25";
-        let (input, (ip, cidr)) = parse_ip_cidr(ip_cidr, "/")?;
-        assert_eq!(input, "");
+        let (ip, cidr) = parse_ip_cidr(ip_cidr, "/")?;
         assert_eq!(ip, Ipv4Addr::new(127, 0, 0, 1));
         assert_eq!(cidr, 25);
         Ok(())
