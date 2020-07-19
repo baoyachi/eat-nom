@@ -12,4 +12,3 @@ edition = "2018"
 
 [dependencies]
 nom = "6.0.0-alpha1"
-ipnetwork = "0.16.0"

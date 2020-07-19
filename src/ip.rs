@@ -1,7 +1,7 @@
 use crate::error::EatResult;
+use nom::character::complete::digit1;
 use nom::{bytes::complete::tag, error::ErrorKind, sequence::tuple, InputTakeAtPosition};
 use std::net::IpAddr;
-use nom::character::complete::digit1;
 
 pub fn ip(input: &str) -> nom::IResult<&str, &str> {
     input.split_at_position1_complete(
@@ -24,7 +24,6 @@ pub fn parse_ip(input: &str) -> EatResult<IpAddr> {
     let ip = out.parse::<IpAddr>()?;
     Ok(ip)
 }
-
 
 /// ```rust
 /// # fn main() {
@@ -49,7 +48,6 @@ pub fn parse_ip_cidr<'a>(input: &'a str, concat: &'a str) -> EatResult<(IpAddr, 
     let cidr = cidr.parse::<usize>()?;
     Ok((ip, cidr))
 }
-
 
 #[cfg(test)]
 mod tests {

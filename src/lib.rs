@@ -1,4 +1,3 @@
-extern crate ipnetwork;
 extern crate nom;
 
 pub mod error;
