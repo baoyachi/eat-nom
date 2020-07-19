@@ -1,9 +1,12 @@
 pub type EatResult<I> = std::result::Result<I, ErrorKind>;
 
+use std::num::ParseIntError;
+
 #[derive(Debug)]
 pub enum ErrorKind {
     StringError(String),
     NomError(String),
+    ParseIntError(ParseIntError),
 }
 
 impl std::fmt::Display for ErrorKind {
@@ -12,6 +15,7 @@ impl std::fmt::Display for ErrorKind {
         match &self {
             ErrorKind::StringError(ref e) => e.fmt(f),
             ErrorKind::NomError(ref e) => e.fmt(f),
+            ErrorKind::ParseIntError(ref e) => e.fmt(f),
         }
     }
 }
@@ -22,6 +26,7 @@ impl std::error::Error for ErrorKind {
         match &self {
             ErrorKind::StringError(ref _e) => None,
             ErrorKind::NomError(ref _e) => None,
+            ErrorKind::ParseIntError(ref e) => Some(e),
         }
     }
 }
@@ -30,6 +35,13 @@ impl From<std::net::AddrParseError> for ErrorKind {
     #[cfg_attr(tarpaulin, skip)]
     fn from(s: std::net::AddrParseError) -> Self {
         ErrorKind::StringError(s.to_string())
+    }
+}
+
+impl From<ParseIntError> for ErrorKind {
+    #[cfg_attr(tarpaulin, skip)]
+    fn from(s: ParseIntError) -> Self {
+        ErrorKind::ParseIntError(s)
     }
 }
 

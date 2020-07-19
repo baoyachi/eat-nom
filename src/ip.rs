@@ -1,6 +1,7 @@
 use crate::error::EatResult;
 use nom::{bytes::complete::tag, error::ErrorKind, sequence::tuple, InputTakeAtPosition};
 use std::net::IpAddr;
+use nom::character::complete::digit1;
 
 pub fn ip(input: &str) -> nom::IResult<&str, &str> {
     input.split_at_position1_complete(
@@ -31,6 +32,14 @@ pub fn parse_ip_mask<'a>(input: &'a str, concat: &'a str) -> EatResult<(&'a str,
     Ok((input, (ip, mask)))
 }
 
+pub fn parse_ip_cidr<'a>(input: &'a str, concat: &'a str) -> EatResult<(&'a str, (IpAddr, usize))> {
+    let (input, (ip, _, cidr)) = tuple((ip, tag(concat), digit1))(input)?;
+    let ip = ip.parse::<IpAddr>()?;
+    let cidr = cidr.parse::<usize>()?;
+    Ok((input, (ip, cidr)))
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -52,6 +61,16 @@ mod tests {
         let (input, ip) = parse_ip(ipv4)?;
         assert_eq!(input, "");
         assert_eq!(ip, Ipv4Addr::new(127, 0, 0, 1));
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_ip_cidr() -> EatResult<()> {
+        let ip_cidr = "127.0.0.1/25";
+        let (input, (ip, cidr)) = parse_ip_cidr(ip_cidr, "/")?;
+        assert_eq!(input, "");
+        assert_eq!(ip, Ipv4Addr::new(127, 0, 0, 1));
+        assert_eq!(cidr, 25);
         Ok(())
     }
 }
