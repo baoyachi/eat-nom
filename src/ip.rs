@@ -1,4 +1,4 @@
-use crate::error::EResult;
+use crate::error::EatResult;
 use nom::{bytes::complete::tag, error::ErrorKind, sequence::tuple, InputTakeAtPosition};
 use std::net::IpAddr;
 
@@ -18,13 +18,13 @@ pub fn mask(input: &str) -> nom::IResult<&str, &str> {
     ip(input)
 }
 
-pub fn parse_ip(input: &str) -> EResult<(&str, IpAddr)> {
+pub fn parse_ip(input: &str) -> EatResult<(&str, IpAddr)> {
     let (input, out) = ip(input)?;
     let ip = out.parse::<IpAddr>()?;
     Ok((input, ip))
 }
 
-pub fn parse_ip_mask<'a>(input: &'a str, concat: &'a str) -> EResult<(&'a str, (IpAddr, IpAddr))> {
+pub fn parse_ip_mask<'a>(input: &'a str, concat: &'a str) -> EatResult<(&'a str, (IpAddr, IpAddr))> {
     let (input, (ip, _, mask)) = tuple((ip, tag(concat), mask))(input)?;
     let ip = ip.parse::<IpAddr>()?;
     let mask = mask.parse::<IpAddr>()?;
@@ -37,7 +37,7 @@ mod tests {
     use std::net::Ipv4Addr;
 
     #[test]
-    fn test_parse_ip_mask() -> EResult<()> {
+    fn test_parse_ip_mask() -> EatResult<()> {
         let ip_mask = "127.0.0.1/255.0.255.0";
         let (input, (ip, mask)) = parse_ip_mask(ip_mask, "/")?;
         assert_eq!(input, "");
@@ -47,7 +47,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_ip() -> EResult<()> {
+    fn test_parse_ip() -> EatResult<()> {
         let ipv4 = "127.0.0.1";
         let (input, ip) = parse_ip(ipv4)?;
         assert_eq!(input, "");

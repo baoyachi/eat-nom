@@ -1,4 +1,4 @@
-pub type EResult<I> = std::result::Result<I, ErrorKind>;
+pub type EatResult<I> = std::result::Result<I, ErrorKind>;
 
 #[derive(Debug)]
 pub enum ErrorKind {
@@ -65,7 +65,7 @@ mod tests {
     use nom::bytes::complete::take_until;
 
     #[test]
-    fn test_until_eof_ok() -> EResult<()> {
+    fn test_until_eof_ok() -> EatResult<()> {
         fn until_eof(s: &str) -> nom::IResult<&str, &str> {
             take_until("eof")(s)
         }
@@ -77,7 +77,7 @@ mod tests {
     }
 
     #[test]
-    fn test_until_eof_error() -> EResult<()> {
+    fn test_until_eof_error() -> EatResult<()> {
         fn until_eof(s: &str) -> nom::IResult<&str, &str> {
             take_until("e1of")(s)
         }
