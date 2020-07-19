@@ -6,6 +6,13 @@ use nom::branch::alt;
 use nom::bytes::complete::tag;
 use crate::util::new_range;
 
+
+pub fn parse_port(input: &str) -> EatResult<usize> {
+    let (_, digit) = digit1(input);
+    let digit = digit.parse::<usize>()?;
+    Ok(digit)
+}
+
 pub fn parse_port_range_opt(input: &str) -> EatResult<Range<usize>> {
     let (_, (start, _, end)) = tuple((digit1,
                                       alt((tag("/"), tag("-"), tag(" "), tag("\\"))),
