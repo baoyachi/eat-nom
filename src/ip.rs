@@ -1,6 +1,6 @@
 use crate::error::EResult;
 use nom::{
-    branch::alt, bytes::complete::tag, error::ErrorKind, sequence::tuple, InputTakeAtPosition,
+    bytes::complete::tag, error::ErrorKind, sequence::tuple, InputTakeAtPosition,
 };
 use std::net::IpAddr;
 
