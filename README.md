@@ -13,6 +13,3 @@ eat nom based on [nom](https://github.com/Geal/nom). A tools about normal domain
 * net
 * time
 
-# link
-* [https://github.com/fflorent/nom_locate](https://github.com/fflorent/nom_locate)
-* [https://github.com/dalance/nom-tracable](https://github.com/dalance/nom-tracable)
