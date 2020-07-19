@@ -30,8 +30,8 @@ pub fn parse_ip(input: &str) -> EResult<(&str, IpAddr)> {
     Ok((input, ip))
 }
 
-pub fn parse_ip_mask<'a>(input: &'a str, split: &'a str) -> EResult<(&'a str, (IpAddr, IpAddr))> {
-    let (input, (ip, _, mask)) = tuple((ip, tag(split), mask))(input)?;
+pub fn parse_ip_mask<'a>(input: &'a str, concat: &'a str) -> EResult<(&'a str, (IpAddr, IpAddr))> {
+    let (input, (ip, _, mask)) = tuple((ip, tag(concat), mask))(input)?;
     let ip = ip.parse::<IpAddr>()?;
     let mask = mask.parse::<IpAddr>()?;
     Ok((input, (ip, mask)))
