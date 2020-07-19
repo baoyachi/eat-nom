@@ -26,6 +26,8 @@ pub fn parse_ip(input: &str) -> EatResult<IpAddr> {
     Ok(ip)
 }
 
+/// `parse_ip_mask` can parse str with IpAddr:"127.0.0.1/255.0.255.0" => (IpAddr, IpAddr)
+///
 /// # Example
 /// ```rust
 ///
