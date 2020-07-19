@@ -13,8 +13,11 @@ eat nom based on [nom](https://github.com/Geal/nom). A tools about normal domain
 * parse_ip_mask
 ```rust
 extern crate eat_nom;
+
 use eat_nom::ip::parse_ip_mask;
-fn main(){
+use std::net::Ipv4Addr;
+
+fn main() {
     let ip_mask = "127.0.0.1/255.0.255.0";
     let (ip, mask) = parse_ip_mask(ip_mask, "/").unwrap();
     assert_eq!(ip, Ipv4Addr::new(127, 0, 0, 1));
