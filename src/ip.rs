@@ -1,8 +1,8 @@
 use crate::error::EatResult;
+use nom::branch::alt;
 use nom::character::complete::digit1;
 use nom::{bytes::complete::tag, error::ErrorKind, sequence::tuple, InputTakeAtPosition};
 use std::net::IpAddr;
-use nom::branch::alt;
 
 pub fn ip(input: &str) -> nom::IResult<&str, &str> {
     input.split_at_position1_complete(
@@ -44,14 +44,12 @@ pub fn parse_ip_mask<'a>(input: &'a str, concat: &'a str) -> EatResult<(IpAddr, 
 }
 
 pub fn parse_ip_mask_opt(input: &str) -> EatResult<(IpAddr, IpAddr)> {
-    let (_, (ip, _, mask)) = tuple((ip,
-                                    alt((tag("/"), tag("-"), tag(" "), tag("\\"))),
-                                    mask))(input)?;
+    let (_, (ip, _, mask)) =
+        tuple((ip, alt((tag("/"), tag("-"), tag(" "), tag("\\"))), mask))(input)?;
     let ip = ip.parse::<IpAddr>()?;
     let mask = mask.parse::<IpAddr>()?;
     Ok((ip, mask))
 }
-
 
 pub fn parse_ip_cidr<'a>(input: &'a str, concat: &'a str) -> EatResult<(IpAddr, usize)> {
     let (_, (ip, _, cidr)) = tuple((ip, tag(concat), digit1))(input)?;
@@ -61,14 +59,12 @@ pub fn parse_ip_cidr<'a>(input: &'a str, concat: &'a str) -> EatResult<(IpAddr, 
 }
 
 pub fn parse_ip_cidr_opt(input: &str) -> EatResult<(IpAddr, usize)> {
-    let (_, (ip, _, cidr)) = tuple((ip,
-                                    alt((tag("/"), tag("-"), tag(" "), tag("\\"))),
-                                    digit1))(input)?;
+    let (_, (ip, _, cidr)) =
+        tuple((ip, alt((tag("/"), tag("-"), tag(" "), tag("\\"))), digit1))(input)?;
     let ip = ip.parse::<IpAddr>()?;
     let cidr = cidr.parse::<usize>()?;
     Ok((ip, cidr))
 }
-
 
 #[cfg(test)]
 mod tests {
