@@ -31,7 +31,6 @@ pub fn parse_ip(input: &str) -> EatResult<IpAddr> {
 /// # Example
 /// ```rust
 ///
-///
 /// use eat_nom::ip::parse_ip_mask;
 /// use std::net::{Ipv4Addr, IpAddr};
 ///
