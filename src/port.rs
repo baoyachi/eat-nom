@@ -20,7 +20,7 @@ pub fn parse_port_range_opt(input: &str) -> EatResult<Range<usize>> {
     ))(input)?;
     let start = start.parse::<usize>()?;
     let end = end.parse::<usize>()?;
-    Ok((new_range(start, end)))
+    Ok(new_range(start, end))
 }
 
 pub fn parse_port_range<'a>(input: &'a str, concat: &'a str) -> EatResult<Range<usize>> {
