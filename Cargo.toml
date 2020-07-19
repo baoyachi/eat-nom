@@ -1,6 +1,6 @@
 [package]
 name = "eat-nom"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["baoyachi <liaoymxsdl@gmail.com>"]
 description = "A tools about normal domain extend use nom"
 license = "MIT"
