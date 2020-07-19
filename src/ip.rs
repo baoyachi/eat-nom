@@ -1,7 +1,5 @@
 use crate::error::EResult;
-use nom::{
-    bytes::complete::tag, error::ErrorKind, sequence::tuple, InputTakeAtPosition,
-};
+use nom::{bytes::complete::tag, error::ErrorKind, sequence::tuple, InputTakeAtPosition};
 use std::net::IpAddr;
 
 pub fn ip(input: &str) -> nom::IResult<&str, &str> {
