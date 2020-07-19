@@ -33,7 +33,6 @@ impl From<std::net::AddrParseError> for ErrorKind {
     }
 }
 
-
 impl nom::error::ParseError<&str> for ErrorKind {
     #[cfg_attr(tarpaulin, skip)]
     fn from_error_kind(input: &str, kind: nom::error::ErrorKind) -> Self {

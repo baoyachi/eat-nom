@@ -1,11 +1,7 @@
-use nom::{
-    branch::alt,
-    bytes::complete::tag,
-    error::ErrorKind,
-    sequence::tuple,
-    InputTakeAtPosition,
-};
 use crate::error::EResult;
+use nom::{
+    branch::alt, bytes::complete::tag, error::ErrorKind, sequence::tuple, InputTakeAtPosition,
+};
 use std::net::IpAddr;
 
 pub fn ip(input: &str) -> nom::IResult<&str, &str> {
@@ -37,7 +33,6 @@ pub fn parse_ip_mask<'a>(input: &'a str, concat: &'a str) -> EResult<(&'a str, (
     Ok((input, (ip, mask)))
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -46,10 +41,10 @@ mod tests {
     #[test]
     fn test_parse_ip_mask() -> EResult<()> {
         let ip_mask = "127.0.0.1/255.0.255.0";
-        let (input, (ip,mask)) = parse_ip_mask(ip_mask,"/")?;
+        let (input, (ip, mask)) = parse_ip_mask(ip_mask, "/")?;
         assert_eq!(input, "");
         assert_eq!(ip, Ipv4Addr::new(127, 0, 0, 1));
-        assert_eq!(mask, Ipv4Addr::new(255,0,255,0));
+        assert_eq!(mask, Ipv4Addr::new(255, 0, 255, 0));
         Ok(())
     }
 
