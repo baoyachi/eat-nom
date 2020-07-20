@@ -7,7 +7,7 @@ license = "MIT"
 repository = "https://github.com/baoyachi/eat-nom.git"
 readme = "README.md"
 edition = "2018"
-keywords = ["parser", "parser-combinators", "parsing", "ip", "ipmask","iprange","port","portrange"]
+keywords = ["parser", "parsing", "ipmask","iprange","port"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
