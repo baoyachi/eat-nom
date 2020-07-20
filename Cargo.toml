@@ -1,12 +1,13 @@
 [package]
 name = "eat-nom"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["baoyachi <liaoymxsdl@gmail.com>"]
 description = "A tools about normal domain extend use nom"
 license = "MIT"
 repository = "https://github.com/baoyachi/eat-nom.git"
 readme = "README.md"
 edition = "2018"
+keywords = ["parser", "parser-combinators", "parsing", "ip", "ipmask","iprange","port","portrange"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
