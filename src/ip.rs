@@ -1,8 +1,10 @@
 use crate::error::EatResult;
+use crate::util::new_range;
 use nom::branch::alt;
 use nom::character::complete::digit1;
 use nom::{bytes::complete::tag, error::ErrorKind, sequence::tuple, InputTakeAtPosition};
 use std::net::IpAddr;
+use std::ops::Range;
 
 pub fn ip(input: &str) -> nom::IResult<&str, &str> {
     input.split_at_position1_complete(
@@ -52,6 +54,21 @@ pub fn parse_ip_mask_opt(input: &str) -> EatResult<(IpAddr, IpAddr)> {
     let ip = ip.parse::<IpAddr>()?;
     let mask = mask.parse::<IpAddr>()?;
     Ok((ip, mask))
+}
+
+pub fn parse_ip_range<'a>(input: &'a str, concat: &'a str) -> EatResult<Range<IpAddr>> {
+    let (_, (start, _, end)) = tuple((ip, tag(concat), ip))(input)?;
+    let start = start.parse::<IpAddr>()?;
+    let end = end.parse::<IpAddr>()?;
+    Ok(new_range(start, end))
+}
+
+pub fn parse_ip_range_opt(input: &str) -> EatResult<Range<IpAddr>> {
+    let (_, (start, _, end)) =
+        tuple((ip, alt((tag("/"), tag("-"), tag(" "), tag("\\"))), ip))(input)?;
+    let start = start.parse::<IpAddr>()?;
+    let end = end.parse::<IpAddr>()?;
+    Ok(new_range(start, end))
 }
 
 pub fn parse_ip_cidr<'a>(input: &'a str, concat: &'a str) -> EatResult<(IpAddr, usize)> {
