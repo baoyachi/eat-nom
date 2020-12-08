@@ -1,11 +1,11 @@
-use nom::{InputTakeAtPosition, AsChar};
 use nom::error::ErrorKind;
+use nom::{AsChar, InputTakeAtPosition};
 
 pub fn key(input: &str) -> nom::IResult<&str, &str> {
     input.split_at_position1_complete(
-        |item|
-            !(item.is_alphanum() || item.as_char() == '-' || item.as_char() == '_'),
-        ErrorKind::Alpha)
+        |item| !(item.is_alphanum() || item.as_char() == '-' || item.as_char() == '_'),
+        ErrorKind::Alpha,
+    )
 }
 
 #[cfg(test)]

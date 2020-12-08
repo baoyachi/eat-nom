@@ -1,7 +1,8 @@
-mod key;
-mod extra;
-mod kv;
 mod express;
+mod extra;
+mod key;
+mod kv;
+use express::express;
 
 fn main() {
     // let extra_basic = r#"a="x""#;
@@ -23,8 +24,18 @@ fn main() {
     //
     // let express_5 = r#"{a:a|b:b|c:c d="d1" e=["e1","e2"]}"#;
 
-    println!("Hello, world!");
-
-
-
+    let input = r#"{a|b|c:x d="x" e="y" f=["z1","z2","z3"]}~hello rust"#;
+    let (input, out) = express(input).unwrap();
+    assert_eq!("~hello rust", input);
+    assert_eq!(
+        (
+            vec![("a", "x"), ("b", "x"), ("c", "x")],
+            vec![
+                ("d", vec!["x"]),
+                ("e", vec!["y"]),
+                ("f", vec!["z1", "z2", "z3"]),
+            ],
+        ),
+        out
+    );
 }

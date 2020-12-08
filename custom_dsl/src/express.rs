@@ -1,11 +1,11 @@
-use nom::sequence::tuple;
+use crate::extra::extra;
+use crate::kv::kvs;
 use nom::bytes::complete::tag;
 use nom::character::complete::multispace0;
-use crate::kv::kvs;
-use crate::extra::extra;
 use nom::combinator::opt;
+use nom::sequence::tuple;
 
-fn express(input: &str) -> nom::IResult<&str, (Vec<(&str, &str)>, Vec<(&str, Vec<&str>)>)> {
+pub fn express(input: &str) -> nom::IResult<&str, (Vec<(&str, &str)>, Vec<(&str, Vec<&str>)>)> {
     let (input, (_, _, kvs, _, extra, _, _)) = tuple((
         tag("{"),
         multispace0,
@@ -31,18 +31,17 @@ mod tests {
         let input = r#"{a|b|c:x a="x" b="y" c=["z1","z2","z3"]}~rust"#;
         let (input, out) = express(input).unwrap();
         assert_eq!("~rust", input);
-        assert_eq!((
-                       vec![
-                           ("a", "x"),
-                           ("b", "x"),
-                           ("c", "x")
-                       ],
-                       vec![
-                           ("a", vec!["x"]),
-                           ("b", vec!["y"]),
-                           ("c", vec!["z1", "z2", "z3"]),
-                       ],
-                   ), out);
+        assert_eq!(
+            (
+                vec![("a", "x"), ("b", "x"), ("c", "x")],
+                vec![
+                    ("a", vec!["x"]),
+                    ("b", vec!["y"]),
+                    ("c", vec!["z1", "z2", "z3"]),
+                ],
+            ),
+            out
+        );
     }
 
     #[test]
@@ -50,18 +49,17 @@ mod tests {
         let input = r#"{a:a|b:b|c:c a="x" b="y" c=["z1","z2","z3"]}~rust"#;
         let (input, out) = express(input).unwrap();
         assert_eq!("~rust", input);
-        assert_eq!((
-                       vec![
-                           ("a", "a"),
-                           ("b", "b"),
-                           ("c", "c")
-                       ],
-                       vec![
-                           ("a", vec!["x"]),
-                           ("b", vec!["y"]),
-                           ("c", vec!["z1", "z2", "z3"]),
-                       ],
-                   ), out);
+        assert_eq!(
+            (
+                vec![("a", "a"), ("b", "b"), ("c", "c")],
+                vec![
+                    ("a", vec!["x"]),
+                    ("b", vec!["y"]),
+                    ("c", vec!["z1", "z2", "z3"]),
+                ],
+            ),
+            out
+        );
     }
 
     #[test]
@@ -69,13 +67,6 @@ mod tests {
         let input = r#"{a|b|c:x}@rust"#;
         let (input, out) = express(input).unwrap();
         assert_eq!("@rust", input);
-        assert_eq!((
-                       vec![
-                           ("a", "x"),
-                           ("b", "x"),
-                           ("c", "x")
-                       ],
-                       vec![],
-                   ), out);
+        assert_eq!((vec![("a", "x"), ("b", "x"), ("c", "x")], vec![],), out);
     }
 }

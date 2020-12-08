@@ -1,15 +1,22 @@
 use crate::key::key;
-use nom::character::complete::{multispace0, multispace1};
 use nom::bytes::complete::{tag, take_until};
-use nom::sequence::tuple;
-use nom::multi::separated_list0;
+use nom::character::complete::{multispace0, multispace1};
 use nom::combinator::opt;
-
+use nom::multi::separated_list0;
+use nom::sequence::tuple;
 
 /// a="x"
 /// a = "x"
 fn extra_obj(input: &str) -> nom::IResult<&str, (&str, &str)> {
-    let (input, (k, _, _, _, _, v, _)) = tuple((key, multispace0, tag("="), multispace0, tag("\""), take_until("\""), tag("\"")))(input)?;
+    let (input, (k, _, _, _, _, v, _)) = tuple((
+        key,
+        multispace0,
+        tag("="),
+        multispace0,
+        tag("\""),
+        take_until("\""),
+        tag("\""),
+    ))(input)?;
     Ok((input, (k, v)))
 }
 
@@ -32,7 +39,6 @@ fn sep_arr(input: &str) -> nom::IResult<&str, Vec<&str>> {
     Ok((input, value))
 }
 
-
 /// a = ["x","y","z"]
 fn extra_arr(input: &str) -> nom::IResult<&str, (&str, Vec<&str>)> {
     let (input, (k, _, _, _, _, v, _)) = tuple((
@@ -42,17 +48,15 @@ fn extra_arr(input: &str) -> nom::IResult<&str, (&str, Vec<&str>)> {
         multispace0,
         tag("["),
         sep_arr,
-        tag("]")
+        tag("]"),
     ))(input)?;
     Ok((input, (k, v)))
 }
 
 ///a= "x" b=["x","y","z"]
 pub fn extra(input: &str) -> nom::IResult<&str, Vec<(&str, Vec<&str>)>> {
-    let (input, val) = separated_list0(
-        multispace1,
-        tuple((opt(extra_obj), opt(extra_arr))),
-    )(input)?;
+    let (input, val) =
+        separated_list0(multispace1, tuple((opt(extra_obj), opt(extra_arr))))(input)?;
 
     //out:[(Some(("a", "x")), None), (None, Some(("b", ["x", "y", "z"])))]
     let mut k_vec = vec![];
@@ -71,7 +75,6 @@ pub fn extra(input: &str) -> nom::IResult<&str, Vec<(&str, Vec<&str>)>> {
     Ok((input, k_vec))
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -86,26 +89,24 @@ mod tests {
         let input = r#"a= "x" b=["x","y","z"]~rust"#;
         let (input, out) = extra(input).unwrap();
         assert_eq!("~rust", input);
-        assert_eq!(vec![
-            ("a", vec!["x"]),
-            ("b", vec!["x", "y", "z"])
-        ], out);
+        assert_eq!(vec![("a", vec!["x"]), ("b", vec!["x", "y", "z"])], out);
     }
-
 
     #[test]
     fn test_extra_1() {
         let input = r#"a= "x" b=["x","y","z"] c="c" d=["d1","d2", "d3"]~rust"#;
         let (input, out) = extra(input).unwrap();
         assert_eq!("~rust", input);
-        assert_eq!(vec![
-            ("a", vec!["x"]),
-            ("b", vec!["x", "y", "z"]),
-            ("c", vec!["c"]),
-            ("d", vec!["d1", "d2", "d3"])
-        ], out);
+        assert_eq!(
+            vec![
+                ("a", vec!["x"]),
+                ("b", vec!["x", "y", "z"]),
+                ("c", vec!["c"]),
+                ("d", vec!["d1", "d2", "d3"])
+            ],
+            out
+        );
     }
-
 
     #[test]
     fn test_extra_arr() {
@@ -140,7 +141,6 @@ mod tests {
         assert_eq!("rust", input);
         assert_eq!(out, vec!["x", "y", "z"]);
     }
-
 
     #[test]
     fn test_extra_basic_1() {

@@ -1,28 +1,19 @@
-use nom::sequence::{tuple, delimited};
 use crate::key::key;
 use nom::bytes::complete::tag;
 use nom::character::complete::multispace0;
 use nom::multi::separated_list0;
+use nom::sequence::{delimited, tuple};
 
 ///a:x
 fn kv(input: &str) -> nom::IResult<&str, (&str, &str)> {
-    let (input, (k, _, _, _, v, _)) = tuple((
-        key,
-        multispace0,
-        tag(":"),
-        multispace0,
-        key,
-        multispace0,
-    ))(input)?;
+    let (input, (k, _, _, _, v, _)) =
+        tuple((key, multispace0, tag(":"), multispace0, key, multispace0))(input)?;
     Ok((input, (k, v)))
 }
 
 // a:x|b:y|c:z
 fn kv_multi(input: &str) -> nom::IResult<&str, Vec<(&str, &str)>> {
-    let (input, out) = separated_list0(
-        tag("|"),
-        kv,
-    )(input)?;
+    let (input, out) = separated_list0(tag("|"), kv)(input)?;
     Ok((input, out))
 }
 
@@ -51,7 +42,6 @@ pub fn kvs(input: &str) -> nom::IResult<&str, Vec<(&str, &str)>> {
     return sep_kv_multi(input);
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -61,11 +51,7 @@ mod tests {
         let input = r#"a|b|c:x~rust"#;
         let (input, out) = kvs(input).unwrap();
         assert_eq!("~rust", input);
-        assert_eq!(vec![
-            ("a", "x"),
-            ("b", "x"),
-            ("c", "x"),
-        ], out);
+        assert_eq!(vec![("a", "x"), ("b", "x"), ("c", "x"),], out);
     }
 
     #[test]
@@ -73,11 +59,7 @@ mod tests {
         let input = r#"a:x|b:y|c:z~rust"#;
         let (input, out) = kvs(input).unwrap();
         assert_eq!("~rust", input);
-        assert_eq!(vec![
-            ("a", "x"),
-            ("b", "y"),
-            ("c", "z"),
-        ], out);
+        assert_eq!(vec![("a", "x"), ("b", "y"), ("c", "z"),], out);
     }
 
     #[test]
@@ -85,11 +67,7 @@ mod tests {
         let input = r#"a|b|c:x~rust"#;
         let (input, out) = sep_kv_multi(input).unwrap();
         assert_eq!("~rust", input);
-        assert_eq!(vec![
-            ("a", "x"),
-            ("b", "x"),
-            ("c", "x"),
-        ], out);
+        assert_eq!(vec![("a", "x"), ("b", "x"), ("c", "x"),], out);
     }
 
     #[test]
@@ -97,23 +75,15 @@ mod tests {
         let input = r#"a | b | c:x~rust"#;
         let (input, out) = sep_kv_multi(input).unwrap();
         assert_eq!("~rust", input);
-        assert_eq!(vec![
-            ("a", "x"),
-            ("b", "x"),
-            ("c", "x"),
-        ], out);
+        assert_eq!(vec![("a", "x"), ("b", "x"), ("c", "x"),], out);
     }
-
 
     #[test]
     fn test_kv_multi() {
         let input = r#"a:x|b:y~rust"#;
         let (input, out) = kv_multi(input).unwrap();
         assert_eq!("~rust", input);
-        assert_eq!(vec![
-            ("a", "x"),
-            ("b", "y"),
-        ], out);
+        assert_eq!(vec![("a", "x"), ("b", "y"),], out);
     }
 
     #[test]
