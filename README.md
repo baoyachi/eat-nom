@@ -9,7 +9,12 @@ https://docs.rs/eat-nom)
 
 eat nom based on [nom](https://github.com/Geal/nom). A tools about normal domain extend use nom
 
-# parse ip
+# 《玩转nom解析引擎》
+* https://www.bilibili.com/video/BV1UK4y157BP
+
+
+
+## parse ip
 
 * parse_ip_mask
 ```rust
@@ -25,7 +30,7 @@ fn main() {
     assert_eq!(mask, Ipv4Addr::new(255, 0, 255, 0));
 }
 ```
-* parse_ip_mask_opt
+*# parse_ip_mask_opt
 ```rust
 extern crate eat_nom;
 
